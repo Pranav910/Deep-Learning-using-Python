@@ -1,0 +1,1 @@
+This repository consists of the implementation of concepts from deep learning field such as concept of ANN, CNN, RNN, Transformers etc. These concepts are implemented using python's popular and powerful data analytics frameworks such as tenserflow, keras and pythorch. Will try to cover all the concepts in deep, so stay tuned!
