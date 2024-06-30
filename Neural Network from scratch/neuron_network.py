@@ -2,17 +2,46 @@
 
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 # loading dataset using pandas
 
-dataset = pd.read_csv('Neural Network from scratch/PlacementDataset.csv')
-X, y = dataset[['IQ', 'CGPA']], dataset[['Placement']]
+np.random.seed(0)
+num_samples = 1000
 
-# splitting the dataset into test and train splits
+# Synthetic features: CGPA and IQ
+iq = np.random.uniform(10, 150, num_samples)
+cgpa = np.random.uniform(2, 10, num_samples)
 
-X_test, X_train, y_test, y_train = X[:800].to_numpy(), X[800:].to_numpy(), y[:800].to_numpy(), y[800:].to_numpy()
 
-# Defining the neural network class
+# Synthetic target: Placement (1 for placed, 0 for not placed)
+# Let's assume higher CGPA and IQ have higher chances of placement
+placement = (iq > 50.0).astype(int)
+
+data = {
+    'iq' : iq,
+    'cgpa' : cgpa,
+    'placement' : placement
+}
+
+df = pd.DataFrame(data)
+
+# Standardize the features
+scaler = StandardScaler()
+df[['iq', 'cgpa']] = scaler.fit_transform(df[['iq', 'cgpa']])
+
+# Split into features and target
+X = df[['iq', 'cgpa']].values
+y = df['placement'].values
+
+
+# Split into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+print(np.shape(X_train[0]))
+
+# # Defining the neural network class
 
 class NeuralNetwork:
 
@@ -78,7 +107,7 @@ class NeuralNetwork:
         forward_cache['Z' + str(L)] = parameters['W' + str(L)].dot(forward_cache['A' + str(L - 1)]) + parameters['B' + str(L)]
         forward_cache['A' + str(L)] = self.sigmoid(forward_cache['Z' + str(L)])
         
-        print(forward_cache)
+        # print(forward_cache)
             
         return forward_cache['A' + str(L)], forward_cache
         
@@ -123,10 +152,10 @@ class NeuralNetwork:
     def compile(self):
         
         for i in range(1, len(self.layers)):
-            self.parameters['W' + str(i)] = np.random.rand(self.layers[i].nodes, self.layers[i - 1].nodes)
+            self.parameters['W' + str(i)] = np.random.randn(self.layers[i].nodes, self.layers[i - 1].nodes)
             self.parameters['B' + str(i)] = np.zeros((self.layers[i].nodes, 1))
             
-        print(self.parameters)
+        # print(self.parameters)
             
     def fit(self, X, y):
         
@@ -135,12 +164,14 @@ class NeuralNetwork:
         
         for i in range(len(X)):
             
+            # j = random.randrange(0, 5)
             
             obs, forward_cache = self.feedForward(X[i])
             cost = self.computeCost(obs, y[i], X)
             grads = self.backProp(obs, y[i], parameters, forward_cache)
-            parameters = self.updateParameters(grads, parameters, 0.001)
-        
+            parameters = self.updateParameters(grads, parameters, 0.01)
+            # print(parameters)
+            # print(cost)
 
         return cost
     
@@ -161,8 +192,12 @@ model = NeuralNetwork()
 model.add(Layer(2, 2, type='input'))
 model.add(Layer(2, 1, type='hidden'))
 model.add(Layer(3, 2, type='hidden'))
+model.add(Layer(4, 2, type='hidden'))
 model.add(Layer(1, 0, type='output'))
 model.compile()
+
+# X_train = np.array([[100, 8.5], [90, 8], [85, 8.2], [40, 4], [45, 4.5], [70, 7.5]])
+# y_train = np.array([[1], [1], [1], [0], [0], [1]])
 model.fit(X_train, y_train)
-result = model.predict(np.array([129,2.548110441374412]))
+result = model.predict(X_test[100])
 print(result)
