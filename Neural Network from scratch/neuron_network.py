@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 # loading dataset using pandas
 
 np.random.seed(0)
-num_samples = 1000
+num_samples = 1000 
 
 # Synthetic features: CGPA and IQ
 iq = np.random.uniform(10, 150, num_samples)
